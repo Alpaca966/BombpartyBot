@@ -6,14 +6,16 @@ from bot.config import HOST, PORT
 from bot.utils.logger import logger, packet_logger
 from bot.logic.solver import WordSolver
 
+# ========================================
+# SERVIDOR WEBSOCKET DEL BOT
+# ========================================
 class BotServer:
     def __init__(self):
         self.solver = WordSolver()
-        self.current_player_words = {} # peerId -> palabra_actual
-        self.next_custom_phrase = None # Frase personalizada para el próximo turno
-        self.pending_events = [] # Cola de eventos que llegaron antes del setup
+        self.current_player_words = {}
+        self.next_custom_phrase = None
+        self.pending_events = []
         
-        # --- SISTEMA DE EVENTOS (Dispatcher) ---
         self.event_handlers = {
             "setup": self.on_setup,
             "nextTurn": self.on_next_turn,
@@ -23,8 +25,6 @@ class BotServer:
             "configUpdate": self.on_config_update,
             "customMessage": self.on_custom_message,
             "setPlayerWord": self.on_set_player_word,
-
-            # Eventos informativos (sin lógica compleja)
             "livesLost": self.on_info_event,
             "bonusAlphabetCompleted": self.on_info_event,
             "addPlayer": self.on_info_event,
@@ -32,6 +32,9 @@ class BotServer:
             "setRules": self.on_info_event,
         }
 
+    # ========================================
+    # GESTIÓN DE CONEXIONES
+    # ========================================
     async def handle_connection(self, websocket):
         client_addr = websocket.remote_address
         logger.info(f"[CONN] Cliente conectado desde: {client_addr}")
@@ -65,13 +68,13 @@ class BotServer:
         except Exception as e:
             logger.error(f"[ERROR] Error procesando mensaje: {e}")
 
-    # --- MANEJADORES DE EVENTOS ---
-
+    # ========================================
+    # MANEJADORES DE EVENTOS DEL JUEGO
+    # ========================================
     async def on_setup(self, websocket, payload):
         self.solver.set_my_id(payload.get("selfPeerId"))
         logger.info(f"[SETUP] Setup completo. Mi ID es: {self.solver.my_peer_id}")
         
-        # Detectar idioma del juego desde milestone.dictionaryManifest.name
         try:
             milestone = payload.get("milestone", {})
             dict_manifest = milestone.get("dictionaryManifest", {})
@@ -81,7 +84,6 @@ class BotServer:
             logger.error(f"[SETUP] Error detectando idioma: {e}. Usando español.")
             self.solver.set_language("Spanish")
         
-        # Procesar eventos pendientes que llegaron antes del setup
         if self.pending_events:
             logger.info(f"[SETUP] Procesando {len(self.pending_events)} eventos pendientes...")
             for event_type, event_payload in self.pending_events:
@@ -91,7 +93,6 @@ class BotServer:
             self.pending_events.clear()
 
     async def on_next_turn(self, websocket, payload):
-        # Si aún no tenemos ID, cachear el evento para procesarlo después del setup
         if self.solver.my_peer_id is None:
             logger.info("[CACHE] Evento nextTurn recibido antes del setup. Guardando...")
             self.pending_events.append(("nextTurn", payload))
@@ -114,61 +115,6 @@ class BotServer:
                 return
             await self.play_turn(websocket, syllable)
 
-    async def play_turn(self, websocket, syllable):
-        # 1. Frase Personalizada (Si existe, enviarla PRIMERO)
-        if self.next_custom_phrase:
-            logger.info(f"[CHAT] Enviando frase personalizada: {self.next_custom_phrase}")
-            await self._type_text(websocket, self.next_custom_phrase)
-            
-            # Enviar la frase como submit
-            msg = json.dumps({"action": "escribir_palabra", "word": self.next_custom_phrase})
-            packet_logger.debug(f"[SEND] (Custom Phrase): {msg}")
-            await websocket.send(msg)
-            self.next_custom_phrase = None
-            
-            # Pequeña pausa antes de la palabra real
-            await asyncio.sleep(0.5)
-        
-        # 2. Modo Suicide (perder vida voluntariamente)
-        if self.solver.suicide:
-            logger.warning("[SUICIDE] Modo suicide activado. Enviando /suicide...")
-            await self._type_text(websocket, "/suicide")
-            
-            msg = json.dumps({"action": "escribir_palabra", "word": "/suicide"})
-            packet_logger.debug(f"[SEND] (Suicide): {msg}")
-            await websocket.send(msg)
-            return
-        
-        # 3. Resolver la palabra de la ronda
-        word = self.solver.solve(syllable)
-        if not word:
-            logger.warning(f"[FAIL] No encontré ninguna palabra con '{syllable}'")
-            return
-
-        self.last_attempted_word = word
-        logger.info(f"[SOLVE] Solución encontrada: {word}")
-        
-        # Tiempo para "pensar"
-        think_time = random.uniform(self.solver.start_delay_min, self.solver.start_delay_max)
-        logger.info(f"[THINK] Pensando durante {think_time:.2f}s...")
-        await asyncio.sleep(think_time)
-
-        # 3. Escribir solución
-        await self._type_text(websocket, word)
-
-        # 4. Enviar Submit
-        msg = json.dumps({"action": "escribir_palabra", "word": word})
-        packet_logger.debug(f"[SEND] (Submit): {msg}")
-        await websocket.send(msg)
-
-    async def _type_text(self, websocket, text):
-        """Helper para simular tecleo letra por letra."""
-        current_text = ""
-        for char in text:
-            current_text += char
-            await websocket.send(json.dumps({"action": "teclear_texto", "text": current_text}))
-            await asyncio.sleep(random.uniform(self.solver.min_typing_delay, self.solver.max_typing_delay))
-
     async def on_fail_word(self, websocket, payload):
         if isinstance(payload, list):
             player_id, reason = payload[0], payload[1]
@@ -188,6 +134,11 @@ class BotServer:
                     await self.play_turn(websocket, self.last_syllable)
 
     async def on_correct_word(self, websocket, payload):
+        if self.solver.my_peer_id is None:
+            logger.info("[CACHE] Evento correctWord recibido antes del setup. Guardando...")
+            self.pending_events.append(("correctWord", payload))
+            return
+        
         player_id = payload.get("playerPeerId")
         
         if player_id == self.solver.my_peer_id:
@@ -254,6 +205,59 @@ class BotServer:
     async def on_info_event(self, websocket, payload):
         pass
 
+    # ========================================
+    # LÓGICA DE JUEGO
+    # ========================================
+    async def play_turn(self, websocket, syllable):
+        if self.next_custom_phrase:
+            logger.info(f"[CHAT] Enviando frase personalizada: {self.next_custom_phrase}")
+            await self._type_text(websocket, self.next_custom_phrase)
+            
+            msg = json.dumps({"action": "escribir_palabra", "word": self.next_custom_phrase})
+            packet_logger.debug(f"[SEND] (Custom Phrase): {msg}")
+            await websocket.send(msg)
+            self.next_custom_phrase = None
+            
+            await asyncio.sleep(0.5)
+        
+        if self.solver.suicide:
+            logger.warning("[SUICIDE] Modo suicide activado. Enviando /suicide...")
+            await self._type_text(websocket, "/suicide")
+            
+            msg = json.dumps({"action": "escribir_palabra", "word": "/suicide"})
+            packet_logger.debug(f"[SEND] (Suicide): {msg}")
+            await websocket.send(msg)
+            return
+        
+        word = self.solver.solve(syllable)
+        if not word:
+            logger.warning(f"[FAIL] No encontré ninguna palabra con '{syllable}'")
+            return
+
+        self.last_attempted_word = word
+        logger.info(f"[SOLVE] Solución encontrada: {word}")
+        
+        think_time = random.uniform(self.solver.start_delay_min, self.solver.start_delay_max)
+        logger.info(f"[THINK] Pensando durante {think_time:.2f}s...")
+        await asyncio.sleep(think_time)
+
+        await self._type_text(websocket, word)
+
+        msg = json.dumps({"action": "escribir_palabra", "word": word})
+        packet_logger.debug(f"[SEND] (Submit): {msg}")
+        await websocket.send(msg)
+
+    async def _type_text(self, websocket, text):
+        """Simula tecleo letra por letra."""
+        current_text = ""
+        for char in text:
+            current_text += char
+            await websocket.send(json.dumps({"action": "teclear_texto", "text": current_text}))
+            await asyncio.sleep(random.uniform(self.solver.min_typing_delay, self.solver.max_typing_delay))
+
+    # ========================================
+    # INICIALIZACIÓN DEL SERVIDOR
+    # ========================================
     async def start(self):
         logger.info(f"[INIT] Iniciando servidor en ws://{HOST}:{PORT}")
         async with websockets.serve(self.handle_connection, HOST, PORT):

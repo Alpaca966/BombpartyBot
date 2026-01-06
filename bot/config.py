@@ -1,24 +1,36 @@
 import os
+from dotenv import load_dotenv
 
-# Configuración de Red
-HOST = "localhost"
-PORT = 8765
+# Cargar variables de entorno desde .env
+load_dotenv()
 
-# Rutas de Archivos
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Raíz del proyecto
+# ========================================
+# CONFIGURACIÓN DE RED
+# ========================================
+HOST = os.getenv("HOST", "localhost")
+PORT = int(os.getenv("PORT", "8765"))
+
+# ========================================
+# RUTAS DEL SISTEMA
+# ========================================
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
+LOGS_DIR = os.path.join(DATA_DIR, "logs")
 DICT_DIR = os.path.join(DATA_DIR, "diccionarios")
-DICT_PATH = os.path.join(DICT_DIR, "es.txt")  # Por defecto español (se actualiza dinámicamente)
-LOG_FILE = os.path.join(BASE_DIR, "bot_server.log")
-LOG_PACKETS_FILE = os.path.join(DATA_DIR, "packets.log")
 
-# Configuración de Tiempos (Simulación Humana)
-MIN_TYPING_DELAY = 0.05  # Segundos mínimos entre letras
-MAX_TYPING_DELAY = 0.15  # Segundos máximos entre letras
-START_DELAY_MIN = 0.5    # Tiempo mínimo para "pensar" antes de empezar a escribir
-START_DELAY_MAX = 1.5    # Tiempo máximo para "pensar"
+DICT_PATH = os.path.join(DICT_DIR, "es.txt")
+LOG_FILE = os.path.join(LOGS_DIR, "bot_server.log")
+LOG_PACKETS_FILE = os.path.join(LOGS_DIR, "packets.log")
 
+# ========================================
+# SIMULACIÓN DE COMPORTAMIENTO HUMANO
+# ========================================
+MIN_TYPING_DELAY = float(os.getenv("MIN_TYPING_DELAY", "0.05"))
+MAX_TYPING_DELAY = float(os.getenv("MAX_TYPING_DELAY", "0.15"))
+START_DELAY_MIN = float(os.getenv("START_DELAY_MIN", "0.5"))
+START_DELAY_MAX = float(os.getenv("START_DELAY_MAX", "1.5"))
 
-# Configuración del Juego
-MIN_WORD_LENGTH = 0
-MAX_WORD_LENGTH = 30
+# ========================================
+# CONFIGURACIÓN DE LOGGING
+# ========================================
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

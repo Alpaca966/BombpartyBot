@@ -4,15 +4,17 @@ import re
 from bot.config import DICT_DIR, MIN_TYPING_DELAY, MAX_TYPING_DELAY, START_DELAY_MIN, START_DELAY_MAX
 from bot.utils.logger import logger
 
+# ========================================
+# SOLUCIONADOR DE PALABRAS
+# ========================================
 class WordSolver:
-    # Mapeo de idiomas del juego a archivos de diccionario
     LANGUAGE_MAP = {
         "Spanish": "es.txt",
         "English": "en.txt",
         "German": "de.txt",
         "French": "fr.txt",
         "Italian": "it.txt",
-        "Portuguese": "pt.txt",
+        "Brazilian Portuguese": "pt.txt",
     }
     
     def __init__(self):
@@ -22,30 +24,30 @@ class WordSolver:
         self.current_language = None
         self.dict_path = None
         
-        # Configuración
         self.is_active = True
         self.strategy = "random"
         self.autojoin = False
         self.suicide = False
         
-        # Tiempos
         self.min_typing_delay = MIN_TYPING_DELAY
         self.max_typing_delay = MAX_TYPING_DELAY
         self.start_delay_min = START_DELAY_MIN
         self.start_delay_max = START_DELAY_MAX
         
-        # Buffers para persistencia
         self.banned_words_buffer = set()
         self.new_words_buffer = set()
         self.bonus_alphabet = {}
 
+    # ========================================
+    # GESTIÓN DE IDENTIDAD Y IDIOMA
+    # ========================================
     def set_my_id(self, peer_id):
         self.my_peer_id = peer_id
     
     def set_language(self, language_name):
         """Establece el idioma del juego y carga el diccionario correspondiente."""
         if language_name == self.current_language:
-            return  # Ya está cargado
+            return
         
         dict_file = self.LANGUAGE_MAP.get(language_name)
         if not dict_file:
@@ -56,7 +58,6 @@ class WordSolver:
         self.current_language = language_name
         self.dict_path = os.path.join(DICT_DIR, dict_file)
         
-        # Limpiar buffers al cambiar de idioma
         self.banned_words_buffer.clear()
         self.new_words_buffer.clear()
         
@@ -64,7 +65,7 @@ class WordSolver:
         logger.info(f"[LANG] Idioma establecido: {language_name} ({dict_file})")
 
     def load_dictionary(self):
-        """Carga el diccionario desde el archivo especificado en dict_path."""
+        """Carga el diccionario desde el archivo especificado."""
         if not self.dict_path:
             logger.warning("[LOAD] No se ha establecido un diccionario. Esperando setup...")
             return
@@ -80,6 +81,9 @@ class WordSolver:
             logger.error(f"[ERROR] Error cargando diccionario: {e}")
             self.words = []
 
+    # ========================================
+    # GESTIÓN DE ALFABETO BONUS
+    # ========================================
     def set_bonus_alphabet(self, alphabet_dict):
         self.bonus_alphabet = alphabet_dict.copy()
         logger.info(f"[BONUS] Alfabeto bonus actualizado: {self.bonus_alphabet}")
@@ -92,7 +96,7 @@ class WordSolver:
             self._log_alphabet_progress()
     
     def _log_alphabet_progress(self):
-        """Muestra el progreso del alfabeto bonus cuando la estrategia está activa."""
+        """Muestra el progreso del alfabeto bonus."""
         if not self.bonus_alphabet:
             return
         
@@ -105,12 +109,14 @@ class WordSolver:
             pending_letters = ', '.join([f"{letter}:{count}" for letter, count in pending])
             logger.info(f"[ALPHABET] Pendientes: {total_pending} letras → [{pending_letters}]")
 
+    # ========================================
+    # GESTIÓN DE PALABRAS
+    # ========================================
     def reset_used_words(self):
         self.used_words.clear()
 
     def _normalize_word(self, word):
-        """Elimina caracteres no válidos y espacios. Soporta español e inglés."""
-        # Permitir letras comunes en español e inglés
+        """Normaliza palabras eliminando caracteres no válidos."""
         return re.sub(r'[^a-záéíóúüñ]', '', word.lower().strip())
 
     def mark_word_as_used(self, word):
@@ -125,6 +131,9 @@ class WordSolver:
 
     def learn_word(self, word):
         word = self._normalize_word(word)
+        if not self.dict_path:
+            return
+        
         if word and word not in self.words and word not in self.banned_words_buffer:
             self.words.append(word)
             self.new_words_buffer.add(word)
@@ -157,48 +166,46 @@ class WordSolver:
         except Exception as e:
             logger.error(f"[ERROR] Error guardando diccionario: {e}")
 
+    # ========================================
+    # CONFIGURACIÓN
+    # ========================================
     def update_config(self, config):
         if "active" in config: self.is_active = config["active"]
         if "autojoin" in config: self.autojoin = config["autojoin"]
         if "suicide" in config: self.suicide = config["suicide"]
 
-        # Estrategias
         if config.get("strategy_alphabet"):
             self.strategy = "alphabet"
-            self._log_alphabet_progress()  # Mostrar progreso al activar
+            self._log_alphabet_progress()
         elif config.get("strategy_longest"): self.strategy = "longest"
         elif config.get("strategy_shortest"): self.strategy = "shortest"
         elif any(k in config for k in ["strategy_alphabet", "strategy_longest", "strategy_shortest"]):
-            # Si se desactivó la actual y no hay otra, volver a random
             self.strategy = "random"
 
-        # Tiempos
         if "minTypingDelay" in config: self.min_typing_delay = float(config["minTypingDelay"])
         if "maxTypingDelay" in config: self.max_typing_delay = float(config["maxTypingDelay"])
         if "startDelayMin" in config: self.start_delay_min = float(config["startDelayMin"])
         if "startDelayMax" in config: self.start_delay_max = float(config["startDelayMax"])
 
+    # ========================================
+    # ALGORITMO DE RESOLUCIÓN
+    # ========================================
     def solve(self, syllable):
         syllable = syllable.lower()
         
-        # Filtrado inicial
         candidates = [w for w in self.words if syllable in w and w not in self.used_words]
         
-        # Optimización para modo random: limitar candidatos si hay muchos
         if self.strategy == "random" and len(candidates) > 50:
             candidates = candidates[:50]
 
         if not candidates:
-            # Fallback: buscar en usadas
             return next((w for w in self.words if syllable in w), None)
 
-        # Selección
         if self.strategy == "longest":
             choice = max(candidates, key=len)
         elif self.strategy == "shortest":
             choice = min(candidates, key=len)
         elif self.strategy == "alphabet":
-            # Priorizar palabras que aporten más letras nuevas al bonus
             def score(w):
                 return (sum(1 for c in set(w) if self.bonus_alphabet.get(c, 0) > 0), len(w))
             choice = max(candidates, key=score)
