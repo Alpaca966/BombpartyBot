@@ -25,7 +25,7 @@ Bot inteligente para jugar automáticamente a BombParty (JKLM.fun) con múltiple
 ### 1. Clonar o descargar el proyecto
 
 ```bash
-git clone <tu-repositorio>
+git clone https://github.com/Alpaca966/BombpartyBot
 cd jklmfunBotTampermonkey
 ```
 
@@ -96,7 +96,7 @@ Una vez iniciado, verás un panel en la esquina superior derecha de JKLM.fun con
 - **Suicide**: Modo para perder vidas voluntariamente
 - **Estrategias**: Selecciona cómo elegir palabras
 - **Tiempos**: Ajusta delays en tiempo real
-- **Enviar Frase**: Envía mensajes personalizados
+- **Enviar Frase**: Envía mensajes personalizados (Como si fuera una palabra de respuesta)
 
 ## Uso
 
@@ -128,12 +128,12 @@ Deberías ver:
 
 ## Estrategias Disponibles
 
-| Estrategia | Descripción | Uso recomendado |
-|------------|-------------|------------------|
-| **Random** | Elige palabras aleatorias | Juego casual |
-| **Maximizar Longitud** | Prioriza palabras largas | Impresionar / Puntuación |
-| **Modo Pánico (Cortas)** | Usa palabras cortas | Cuando queda poco tiempo |
-| **Maximizar Alfabeto** | Completa letras bonus | Ganar vidas extra |
+| Estrategia | Descripción |
+|------------|-------------|
+| **Random** | Elige palabras aleatorias |
+| **Maximizar Longitud** | Prioriza palabras largas |
+| **Modo Pánico (Cortas)** | Usa palabras cortas |
+| **Maximizar Alfabeto** | Completa letras bonus |
 
 ## Estructura del Proyecto
 
@@ -173,7 +173,7 @@ jklmfunBotTampermonkey/
 **Problema:** No aparece "Conectado al servidor Python"
 
 **Solución:**
-1. Verifica que el servidor Python esté corriendo
+1. Verifica que el servidor Python se esté ejecutando
 2. Comprueba que el puerto 8765 no esté ocupado
 3. Revisa la consola del navegador (F12) para ver errores
 
@@ -183,7 +183,7 @@ jklmfunBotTampermonkey/
 
 **Soluciones:**
 - Verifica que "Activar Bot" esté marcado
-- Comprueba los logs: `tail -f data/logs/bot_server.log`
+- Comprueba los logs: `data/logs/bot_server.log` y `data/logs/packets.log`
 - Asegúrate de que el evento `setup` se recibió (aparece en logs)
 - Si no llega setup, recarga la página
 
@@ -193,13 +193,6 @@ jklmfunBotTampermonkey/
 
 **Solución:**
 ```bash
-# Ver qué proceso usa el puerto 8765
-# Linux/Mac:
-lsof -i :8765
-
-# Windows:
-netstat -ano | findstr :8765
-
 # Cambiar puerto en .env
 PORT=9000
 ```
@@ -228,16 +221,6 @@ Cambia el nivel en `.env`:
 LOG_LEVEL=WARNING  # Solo advertencias y errores
 ```
 
-### Limpiar logs
-
-```bash
-# Usando la utilidad incluida
-python bot/utils/log_cleaner.py
-
-# O manualmente
-rm data/logs/*.log
-```
-
 ## Desarrollo
 
 ### Ejecutar en modo debug
@@ -249,33 +232,12 @@ LOG_LEVEL=DEBUG
 
 Verás todos los packets enviados/recibidos.
 
-### Añadir nuevo idioma
-
-1. Añade el archivo de diccionario en `data/diccionarios/idioma.txt`
-2. Actualiza `LANGUAGE_MAP` en `bot/logic/solver.py`:
-```python
-LANGUAGE_MAP = {
-    "NuevoIdioma": "idioma.txt",
-    # ...
-}
-```
-
 ## Logs
 
 El bot genera dos archivos de log:
 
 - **`bot_server.log`**: Eventos principales del bot
 - **`packets.log`**: Tráfico de red completo (solo con LOG_LEVEL=DEBUG)
-
-## Contribuciones
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Haz fork del proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Añadir nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
 
 ## Licencia
 
@@ -290,7 +252,7 @@ Este bot es solo para fines educativos y de aprendizaje. El uso de bots puede es
 Si encuentras problemas:
 1. Revisa la sección de Solución de Problemas
 2. Consulta los logs para más información
-3. Abre un issue en el repositorio
+3. Los modelos LLM están para algo... :D
 
 ---
 
