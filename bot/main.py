@@ -2,7 +2,6 @@ import asyncio
 import sys
 import os
 
-# Asegurar que el directorio raíz está en el path para las importaciones
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bot.network.server import BotServer

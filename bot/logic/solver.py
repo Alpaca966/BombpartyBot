@@ -39,7 +39,7 @@ class WordSolver:
         self.bonus_alphabet = {}
 
     # ========================================
-    # GESTIÓN DE IDENTIDAD Y IDIOMA
+    # GESTIÓN DE IDENTIDAD E IDIOMA
     # ========================================
     def set_my_id(self, peer_id):
         self.my_peer_id = peer_id

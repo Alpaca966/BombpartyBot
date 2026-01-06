@@ -13,7 +13,6 @@
 (function () {
   "use strict";
 
-  // Ejecutar únicamente en el iframe del juego
   if (window.self === window.top) return;
 
   // ========================================
@@ -52,6 +51,7 @@
   let gameSocket = null;
   let pythonSocket = null;
   let lastSetupData = null;
+  let pendingInitialConfig = null;
   const PYTHON_URL = "ws://localhost:8765";
 
   // ========================================
@@ -63,8 +63,6 @@
     pythonSocket.onopen = () => {
       Logger.log("Conectado al servidor Python", "success");
       notificarEstado("Python: Conectado");
-
-      sendFullConfig();
 
       if (lastSetupData) {
         Logger.log("Reenviando configuración inicial a Python", "info");
@@ -95,9 +93,21 @@
   }
 
   // ========================================
-  // PROCESAMIENTO DE ÓRDENES DESDE PYTHON
+  // PROCESAMIENTO DE MENSAJES DE PYTHON
   // ========================================
   function procesarOrdenPython(orden) {
+
+    if (orden.event === "initialConfig") {
+      const firstElement = document.getElementById("bot-cfg-minTypingDelay");
+      if (firstElement) {
+        aplicarConfiguracionInicial(orden.data);
+      } else {
+        Logger.log("UI no está listo, guardando config...", "info");
+        pendingInitialConfig = orden.data;
+      }
+      return;
+    }
+
     if (!gameSocket) {
       Logger.error("Orden recibida pero no hay GameSocket disponible.");
       return;
@@ -117,6 +127,48 @@
     if (orden.action === "unirse_juego") {
       Logger.log("Uniéndose a la partida", "python");
       gameSocket.emit("joinRound");
+    }
+  }
+
+  // ========================================
+  // APLICACIÓN DE CONFIGURACIÓN INICIAL
+  // ========================================
+  function aplicarConfiguracionInicial(config) {
+    Logger.log("Aplicando configuración inicial desde Python", "success");
+
+    const numericFields = [
+      "minTypingDelay",
+      "maxTypingDelay",
+      "startDelayMin",
+      "startDelayMax",
+    ];
+    numericFields.forEach((field) => {
+      if (config[field] !== undefined) {
+        const el = document.getElementById("bot-cfg-" + field);
+        if (el) {
+          el.value = config[field];
+        }
+      }
+    });
+
+    const booleanFields = ["active", "autojoin", "suicide"];
+    booleanFields.forEach((field) => {
+      if (config[field] !== undefined) {
+        const el = document.getElementById("bot-cfg-" + field);
+        if (el) {
+          el.checked = config[field];
+        }
+      }
+    });
+  }
+
+  function intentarAplicarConfigPendiente() {
+    if (pendingInitialConfig) {
+      const firstElement = document.getElementById("bot-cfg-minTypingDelay");
+      if (firstElement) {
+        aplicarConfiguracionInicial(pendingInitialConfig);
+        pendingInitialConfig = null;
+      }
     }
   }
 
@@ -185,7 +237,6 @@
           );
         }
       } else {
-        // Python no está conectado, pero si es setup, cachearlo de todos modos
         if (eventName === "setup") {
           lastSetupData = eventData;
           Logger.log("⚠️ SETUP capturado pero Python no conectado (cacheado)", "info");
@@ -209,7 +260,6 @@
   function createUI() {
     if (document.getElementById("bot-ui-container")) return;
 
-    // Contenedor Principal
     uiContainer = document.createElement("div");
     uiContainer.id = "bot-ui-container";
     uiContainer.style = `
@@ -267,11 +317,9 @@
       createCheckbox("strategy_shortest", "Modo Pánico (Cortas)", false)
     );
 
-    // Separador
     body.appendChild(document.createElement("hr")).style =
       "border: 0; border-top: 1px solid #333; margin: 5px 0; width: 100%;";
 
-    // Opciones de Tiempos (Delays)
     const timeLabel = document.createElement("div");
     timeLabel.innerText = "Tiempos (segundos):";
     timeLabel.style = "color: #aaa; margin-bottom: 4px; font-weight: bold;";
@@ -290,11 +338,10 @@
       createNumberInput("startDelayMax", "Start Delay Max", 1.5)
     );
 
-    // Separador
     body.appendChild(document.createElement("hr")).style =
       "border: 0; border-top: 1px solid #333; margin: 5px 0; width: 100%;";
 
-    // Input de Texto Manual (Frase Extra)
+
     const manualInputWrapper = document.createElement("div");
     manualInputWrapper.style =
       "display: flex; flex-direction: column; gap: 2px; margin-bottom: 5px;";
@@ -335,18 +382,16 @@
         sendCustomMessage(manualInput.value);
         manualInput.value = "";
 
-        // Quitar foco y detener interval
+
         if (focusInterval) {
           clearInterval(focusInterval);
           focusInterval = null;
         }
 
-        // Feedback visual
         setTimeout(() => (manualInput.style.borderColor = "#004400"), 200);
       }
 
       if (e.key === "Escape") {
-        // Cancelar: limpiar y salir
         manualInput.blur();
       }
     };
@@ -357,6 +402,8 @@
 
     uiContainer.appendChild(body);
     document.body.appendChild(uiContainer);
+
+    intentarAplicarConfigPendiente();
   }
 
   function createCheckbox(id, labelText, checked) {

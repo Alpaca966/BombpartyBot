@@ -84,6 +84,8 @@ class BotServer:
             logger.error(f"[SETUP] Error detectando idioma: {e}. Usando español.")
             self.solver.set_language("Spanish")
         
+        await self.send_initial_config(websocket)
+        
         if self.pending_events:
             logger.info(f"[SETUP] Procesando {len(self.pending_events)} eventos pendientes...")
             for event_type, event_payload in self.pending_events:
@@ -204,6 +206,25 @@ class BotServer:
 
     async def on_info_event(self, websocket, payload):
         pass
+
+    # ========================================
+    # SINCRONIZACIÓN DE CONFIGURACIÓN
+    # ========================================
+    async def send_initial_config(self, websocket):
+        """Envía la configuración inicial del servidor a Tampermonkey."""
+        config = {
+            "minTypingDelay": self.solver.min_typing_delay,
+            "maxTypingDelay": self.solver.max_typing_delay,
+            "startDelayMin": self.solver.start_delay_min,
+            "startDelayMax": self.solver.start_delay_max,
+            "active": self.solver.is_active,
+            "autojoin": self.solver.autojoin,
+            "suicide": self.solver.suicide,
+        }
+        
+        msg = json.dumps({"event": "initialConfig", "data": config})
+        await websocket.send(msg)
+        logger.info(f"[CONFIG] Configuración inicial enviada a Tampermonkey")
 
     # ========================================
     # LÓGICA DE JUEGO

@@ -4,7 +4,7 @@ Bot inteligente para jugar automáticamente a BombParty (JKLM.fun) con múltiple
 
 ## Características
 
-- **Multi-idioma**: Soporte para español, inglés, alemán, francés, italiano y portugués(de Brasil). Aunque solo el español y el ingles tienen palabras
+- **Multi-idioma**: Soporte para español, inglés, alemán, francés, italiano y portugués(de Brasil).
 - **Múltiples estrategias**: Random, palabras largas, palabras cortas, maximizar alfabeto bonus
 - **Simulación humana**: Delays configurables para tecleo y pensamiento
 - **Aprendizaje automático**: Aprende palabras nuevas y banea palabras inválidas

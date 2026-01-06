@@ -7,7 +7,7 @@ from bot.config import LOG_FILE, LOG_PACKETS_FILE, LOG_LEVEL
 # FORMATEADOR CON COLORES ANSI
 # ========================================
 class ColoredFormatter(logging.Formatter):
-    """Formateador personalizado con colores ANSI para terminal."""
+    """Formateador personalizado con colores ANSI para la terminal."""
     
     GREY = "\x1b[38;5;240m"
     GREEN = "\x1b[32m"
@@ -72,7 +72,7 @@ def setup_logger():
 def setup_packet_logger():
     """Configura logger específico para tráfico de red."""
     packet_logger = logging.getLogger("JKLM_Packets")
-    packet_logger.setLevel(getattr(logging, LOG_LEVEL, logging.DEBUG))
+    packet_logger.setLevel(logging.DEBUG)
     
     if packet_logger.handlers:
         return packet_logger
