@@ -1,165 +1,165 @@
-# JKLM Bot - Automatización para BombParty
+# JKLM Bot - BombParty Automation
 
-Bot inteligente para jugar automáticamente a BombParty (JKLM.fun) con múltiples estrategias y simulación de comportamiento humano.
+Intelligent bot to automatically play BombParty (JKLM.fun) with multiple strategies and human behavior simulation.
 
-## Características
+## Features
 
-- **Multi-idioma**: Soporte para español, inglés, alemán, francés, italiano y portugués(de Brasil).
-- **Múltiples estrategias**: Random, palabras largas, palabras cortas, maximizar alfabeto bonus
-- **Simulación humana**: Delays configurables para tecleo y pensamiento
-- **Aprendizaje automático**: Aprende palabras nuevas y banea palabras inválidas
-- **Interfaz visual**: Panel de control en el navegador con configuración en tiempo real
-- **Sistema de logging**: Logs detallados con colores y niveles configurables
-- **Persistencia**: Guarda automáticamente cambios en el diccionario
-- **Altamente configurable**: Variables de entorno con `.env`
+- **Multi-language**: Support for Spanish, English, German, French, Italian, and Portuguese (Brazilian).
+- **Multiple strategies**: Random, long words, short words, maximize bonus alphabet
+- **Human simulation**: Configurable delays for typing and thinking
+- **Auto-learning**: Learns new words and bans invalid words
+- **Visual interface**: In-browser control panel with real-time configuration
+- **Logging system**: Detailed logs with colors and configurable levels
+- **Persistence**: Automatically saves dictionary changes
+- **Highly configurable**: Environment variables with `.env`
 
-## Requisitos Previos
+## Prerequisites
 
 - **Python 3.8+**
 - **pip**
-- **Navegador web** (Testeado en Chrome)
-- **Tampermonkey** (extensión de navegador)
+- **Web browser** (Tested on Chrome)
+- **Tampermonkey** (browser extension)
 
-## Instalación
+## Installation
 
-### 1. Clonar o descargar el proyecto
+### 1. Clone or download the project
 
 ```bash
 git clone https://github.com/Alpaca966/BombpartyBot
 cd BombpartyBot
 ```
 
-### 2. Crear entorno virtual (opcional pero recomendado)
+### 2. Create virtual environment (optional but recommended)
 
-**En Linux/Mac:**
+**On Linux/Mac:**
 ```bash
 python3 -m venv venv
 source .venv/bin/activate
 ```
 
-**En Windows:**
+**On Windows:**
 ```bash
 python -m venv venv
 .venv\Scripts\activate
 ```
 
-### 3. Instalar dependencias
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configurar variables de entorno
+### 4. Configure environment variables
 
 ```bash
-# Copiar plantilla de configuración
+# Copy configuration template
 cp .env.example .env
 
-# Editar .env con tu configuración (opcional)
+# Edit .env with your configuration (optional)
 nano .env
 ```
 
-### 5. Instalar script de Tampermonkey
+### 5. Install Tampermonkey script
 
-1. Instala la extensión [Tampermonkey](https://www.tampermonkey.net/) en tu navegador
-2. Abre `src/main.js`
-3. Copia todo el contenido
-4. En Tampermonkey: **Crear nuevo script** → pegar → **Guardar**
+1. Install the [Tampermonkey](https://www.tampermonkey.net/) extension in your browser
+2. Open `src/main.js`
+3. Copy all the content
+4. In Tampermonkey: **Create new script** → paste → **Save**
 
-## Configuración
+## Configuration
 
-### Archivo `.env`
+### `.env` File
 
-Puedes personalizar el comportamiento del bot editando `.env`:
+You can customize the bot's behavior by editing `.env`:
 
 ```env
-# Servidor WebSocket
+# WebSocket Server
 HOST=localhost
 PORT=8765
 
-# Simulación humana (en segundos)
-MIN_TYPING_DELAY=0.05      # Delay mínimo entre letras
-MAX_TYPING_DELAY=0.15      # Delay máximo entre letras
-START_DELAY_MIN=0.5        # Tiempo mínimo de "pensamiento"
-START_DELAY_MAX=1.5        # Tiempo máximo de "pensamiento"
+# Human simulation (in seconds)
+MIN_TYPING_DELAY=0.05      # Minimum delay between letters
+MAX_TYPING_DELAY=0.15      # Maximum delay between letters
+START_DELAY_MIN=0.5        # Minimum "thinking" time
+START_DELAY_MAX=1.5        # Maximum "thinking" time
 
-# Nivel de logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+# Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 LOG_LEVEL=INFO
 ```
 
-### Panel de Control del Navegador
+### Browser Control Panel
 
-Una vez iniciado, verás un panel en la esquina superior derecha de JKLM.fun con opciones:
+Once started, you'll see a panel in the top-right corner of JKLM.fun with options:
 
-- **Activar Bot**: Habilita/deshabilita el bot
-- **Autounirse a Ronda**: Se une automáticamente cuando vuelves a la sala
-- **Suicide**: Modo para perder vidas voluntariamente
-- **Estrategias**: Selecciona cómo elegir palabras
-- **Tiempos**: Ajusta delays en tiempo real
-- **Enviar Frase**: Envía mensajes personalizados (Como si fuera una palabra de respuesta)
+- **Activate Bot**: Enable/disable the bot
+- **Auto-join Round**: Automatically joins when you return to the room
+- **Suicide**: Mode to lose lives voluntarily
+- **Strategies**: Select how to choose words
+- **Timings**: Adjust delays in real-time
+- **Send Phrase**: Send custom messages (As if it were a response word)
 
-## Uso
+## Usage
 
-### 1. Iniciar el servidor Python
+### 1. Start the Python server
 
 ```bash
 python bot/main.py
 ```
 
-### 2. Abrir JKLM.fun
+### 2. Open JKLM.fun
 
-1. Ve a [https://jklm.fun](https://jklm.fun)
-2. Entra a una sala de BombParty
-3. El script de Tampermonkey se activará automáticamente
-4. Verás en consola: **"Conectado al servidor Python"**
+1. Go to [https://jklm.fun](https://jklm.fun)
+2. Enter a BombParty room
+3. The Tampermonkey script will activate automatically
+4. You'll see in console: **"Connected to Python server"**
 
-### 3. Configurar y jugar
+### 3. Configure and play
 
-- Abre el panel del bot (esquina superior derecha)
-- Activa el bot con el checkbox "Activar Bot"
-- Selecciona tu estrategia preferida
-- El bot jugará automáticamente
+- Open the bot panel (top-right corner)
+- Activate the bot with the "Activate Bot" checkbox
+- Select your preferred strategy
+- The bot will play automatically
 
 
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 BombpartyBot/
 ├── bot/
-│   ├── config.py           # Configuración centralizada
-│   ├── main.py             # Punto de entrada del servidor
+│   ├── config.py           # Centralized configuration
+│   ├── main.py             # Server entry point
 │   ├── logic/
-│   │   └── solver.py       # Lógica de resolución de palabras
+│   │   └── solver.py       # Word solving logic
 │   ├── network/
-│   │   └── server.py       # Servidor WebSocket
+│   │   └── server.py       # WebSocket server
 │   └── utils/
-│       ├── logger.py       # Sistema de logs
-│       └── log_cleaner.py  # Utilidad para limpiar logs
+│       ├── logger.py       # Logging system
+│       └── log_cleaner.py  # Utility to clean logs
 ├── data/
-│   ├── diccionarios/       # Diccionarios de palabras por idioma
+│   ├── diccionarios/       # Word dictionaries by language
 │   │   ├── es.txt
 │   │   ├── en.txt
 │   │   └── ...
-│   └── logs/               # Archivos de log
+│   └── logs/               # Log files
 │       ├── bot_server.log
 │       └── packets.log
 ├── src/
-│   └── main.js             # Script de Tampermonkey
-├── .env                    # Configuración personal
-├── .env.example            # Plantilla de configuración
+│   └── main.js             # Tampermonkey script
+├── .env                    # Personal configuration
+├── .env.example            # Configuration template
 ├── .gitignore
-├── requirements.txt        # Dependencias Python
+├── requirements.txt        # Python dependencies
 └── README.md
 ```
 
-## Licencia
+## License
 
-Este proyecto es de código abierto para fines educativos.
+This project is open source for educational purposes.
 
 ## Disclaimer
 
-Este bot es solo para fines educativos y de aprendizaje. El uso de bots está en contra de los términos de servicio de JKLM.fun. Úsalo bajo tu propia responsabilidad.
+This bot is for educational and learning purposes only. The use of bots is against JKLM.fun's terms of service. Use it at your own risk.
 
 
-**Desarrollado por Alpaca** | Versión 2.0
+**Developed by Alpaca** | Version 2.0
