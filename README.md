@@ -16,8 +16,8 @@ Bot inteligente para jugar automáticamente a BombParty (JKLM.fun) con múltiple
 ## Requisitos Previos
 
 - **Python 3.8+**
-- **pip** (gestor de paquetes de Python)
-- **Navegador web** (Chrome, Firefox, Edge)
+- **pip**
+- **Navegador web** (Testeado en Chrome)
 - **Tampermonkey** (extensión de navegador)
 
 ## Instalación
@@ -26,20 +26,20 @@ Bot inteligente para jugar automáticamente a BombParty (JKLM.fun) con múltiple
 
 ```bash
 git clone https://github.com/Alpaca966/BombpartyBot
-cd jklmfunBotTampermonkey
+cd BombpartyBot
 ```
 
 ### 2. Crear entorno virtual (opcional pero recomendado)
 
 **En Linux/Mac:**
 ```bash
-python3 -m venv .venv
+python3 -m venv venv
 source .venv/bin/activate
 ```
 
 **En Windows:**
 ```bash
-python -m venv .venv
+python -m venv venv
 .venv\Scripts\activate
 ```
 
@@ -106,12 +106,6 @@ Una vez iniciado, verás un panel en la esquina superior derecha de JKLM.fun con
 python bot/main.py
 ```
 
-Deberías ver:
-```
-[INIT] JKLM Bot - Iniciando sistema...
-[INIT] Iniciando servidor en ws://localhost:8765
-```
-
 ### 2. Abrir JKLM.fun
 
 1. Ve a [https://jklm.fun](https://jklm.fun)
@@ -126,19 +120,12 @@ Deberías ver:
 - Selecciona tu estrategia preferida
 - El bot jugará automáticamente
 
-## Estrategias Disponibles
 
-| Estrategia | Descripción |
-|------------|-------------|
-| **Random** | Elige palabras aleatorias |
-| **Maximizar Longitud** | Prioriza palabras largas |
-| **Modo Pánico (Cortas)** | Usa palabras cortas |
-| **Maximizar Alfabeto** | Completa letras bonus |
 
 ## Estructura del Proyecto
 
 ```
-jklmfunBotTampermonkey/
+BombpartyBot/
 ├── bot/
 │   ├── config.py           # Configuración centralizada
 │   ├── main.py             # Punto de entrada del servidor
@@ -147,7 +134,7 @@ jklmfunBotTampermonkey/
 │   ├── network/
 │   │   └── server.py       # Servidor WebSocket
 │   └── utils/
-│       ├── logger.py       # Sistema de logging
+│       ├── logger.py       # Sistema de logs
 │       └── log_cleaner.py  # Utilidad para limpiar logs
 ├── data/
 │   ├── diccionarios/       # Diccionarios de palabras por idioma
@@ -159,85 +146,12 @@ jklmfunBotTampermonkey/
 │       └── packets.log
 ├── src/
 │   └── main.js             # Script de Tampermonkey
-├── .env                    # Configuración personal (no subir a Git)
+├── .env                    # Configuración personal
 ├── .env.example            # Plantilla de configuración
 ├── .gitignore
 ├── requirements.txt        # Dependencias Python
 └── README.md
 ```
-
-## Solución de Problemas
-
-### El bot no se conecta
-
-**Problema:** No aparece "Conectado al servidor Python"
-
-**Solución:**
-1. Verifica que el servidor Python se esté ejecutando
-2. Comprueba que el puerto 8765 no esté ocupado
-3. Revisa la consola del navegador (F12) para ver errores
-
-### El bot no responde / no escribe
-
-**Problema:** El bot no juega su turno
-
-**Soluciones:**
-- Verifica que "Activar Bot" esté marcado
-- Comprueba los logs: `data/logs/bot_server.log` y `data/logs/packets.log`
-- Asegúrate de que el evento `setup` se recibió (aparece en logs)
-- Si no llega setup, recarga la página
-
-### Puerto ocupado
-
-**Problema:** Error "Address already in use"
-
-**Solución:**
-```bash
-# Cambiar puerto en .env
-PORT=9000
-```
-
-Y actualizar en `src/main.js`:
-```javascript
-const PYTHON_URL = "ws://localhost:9000";
-```
-
-### Palabras incorrectas
-
-**Problema:** El bot usa palabras que no existen
-
-**Solución:**
-- Las palabras se banean automáticamente tras fallar
-- Revisa el diccionario en `data/diccionarios/`
-- El bot aprende palabras nuevas automáticamente
-
-### Logs demasiado verbosos
-
-**Problema:** Muchos logs en consola
-
-**Solución:**
-Cambia el nivel en `.env`:
-```env
-LOG_LEVEL=WARNING  # Solo advertencias y errores
-```
-
-## Desarrollo
-
-### Ejecutar en modo debug
-
-```env
-# .env
-LOG_LEVEL=DEBUG
-```
-
-Verás todos los packets enviados/recibidos.
-
-## Logs
-
-El bot genera dos archivos de log:
-
-- **`bot_server.log`**: Eventos principales del bot
-- **`packets.log`**: Tráfico de red completo (solo con LOG_LEVEL=DEBUG)
 
 ## Licencia
 
@@ -245,15 +159,7 @@ Este proyecto es de código abierto para fines educativos.
 
 ## Disclaimer
 
-Este bot es solo para fines educativos y de aprendizaje. El uso de bots puede estar en contra de los términos de servicio de JKLM.fun. Úsalo bajo tu propia responsabilidad.
+Este bot es solo para fines educativos y de aprendizaje. El uso de bots está en contra de los términos de servicio de JKLM.fun. Úsalo bajo tu propia responsabilidad.
 
-## Soporte
-
-Si encuentras problemas:
-1. Revisa la sección de Solución de Problemas
-2. Consulta los logs para más información
-3. Los modelos LLM están para algo... :D
-
----
 
 **Desarrollado por Alpaca** | Versión 2.0
