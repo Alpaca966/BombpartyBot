@@ -62,9 +62,10 @@ nano .env
 ### 5. Install Tampermonkey script
 
 1. Install the [Tampermonkey](https://www.tampermonkey.net/) extension in your browser
-2. Open `src/main.js`
-3. Copy all the content
-4. In Tampermonkey: **Create new script** → paste → **Save**
+2. **Important:** Enable Developer Mode to allow script execution: [Q209: Permission to execute userscripts](https://www.tampermonkey.net/faq.php?locale=en#Q209)
+3. Open `tamperMonkey/main.js`
+4. Copy all the content
+5. In Tampermonkey: **Create new script** → paste → **Save**
 
 ## Configuration
 
