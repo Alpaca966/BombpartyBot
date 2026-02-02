@@ -1,0 +1,16 @@
+16:33:47 [INFO] [INIT] JKLM Bot - Iniciando sistema...
+16:33:47 [INFO] [INIT] Iniciando servidor en ws://localhost:8765
+16:33:50 [INFO] [CONN] Cliente conectado desde: ('::1', 65128, 0, 0)
+16:33:50 [INFO] [CONFIG] Configuración recibida: {'active': True, 'autojoin': False, 'suicide': False, 'strategy_longest': False, 'strategy_alphabet': False, 'strategy_shortest': False, 'minTypingDelay': 0.05, 'maxTypingDelay': 0.15, 'startDelayMin': 0.5, 'startDelayMax': 1.5}
+16:33:50 [INFO] [SETUP] Setup completo. Mi ID es: 543
+16:33:50 [INFO] [LOAD] Diccionario cargado: 0 palabras.
+16:33:50 [INFO] [LANG] Idioma establecido: French (fr.txt)
+16:34:10 [INFO] [TURN] Turno de 527 (Yo: 543) | Sílaba: 'ssa'
+16:34:14 [INFO] [TURN] Turno de 537 (Yo: 543) | Sílaba: 'equ'
+16:34:19 [INFO] [TURN] Turno de 534 (Yo: 543) | Sílaba: 'as'
+16:34:21 [INFO] [TURN] Turno de 183 (Yo: 543) | Sílaba: 'nn'
+16:34:24 [INFO] [TURN] Turno de 530 (Yo: 543) | Sílaba: 'abo'
+16:34:26 [INFO] [TURN] Turno de 414 (Yo: 543) | Sílaba: 'or'
+16:34:28 [INFO] [TURN] Turno de 541 (Yo: 543) | Sílaba: 'id'
+16:34:30 [INFO] 
+[STOP] Servidor detenido por el usuario.
