@@ -132,6 +132,8 @@ class BotServer:
                 self.solver.ban_word(bad_word)
                 
                 if hasattr(self, 'last_syllable'):
+                    if not self.solver.is_active:
+                        return
                     logger.info("[RETRY] Reintentando con otra palabra...")
                     await self.play_turn(websocket, self.last_syllable)
 
